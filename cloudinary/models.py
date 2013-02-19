@@ -41,7 +41,7 @@ class CloudinaryField(models.ImageField):
             raise TypeError("'%s' cannot be modified for %s." % (arg, self.__class__))
 
     options = {
-      'storage': CloudinaryStorage(),
+      'storage': CloudinaryStorage(kwargs.pop('upload_options', {})),
       'upload_to': '/',
     }
     options.update(kwargs)

@@ -8,8 +8,8 @@ import urllib2
 
 
 class CloudinaryStorage(Storage):
-    def __init__(self):
-        pass
+    def __init__(self, upload_options={}):
+        self.upload_options = upload_options
 
     def _open(self, name, mode='rb'):
         if mode != 'rb':
@@ -19,7 +19,7 @@ class CloudinaryStorage(Storage):
         return urllib2.urlopen(url)
 
     def _save(self, name, content):
-        result = cloudinary.uploader.upload(content)
+        result = cloudinary.uploader.upload(content, **self.upload_options)
 
         result['relative'] = True
         (source, options) = cloudinary.utils.cloudinary_url(
