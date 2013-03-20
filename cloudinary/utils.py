@@ -109,7 +109,7 @@ def cloudinary_url(source, **options):
     if secure:
       prefix = "https://" + secure_distribution
     else:
-      subdomain = "a%d." % str(zlib.crc32(source) % 5 + 1) if cdn_subdomain else ""
+      subdomain = ("a%d." % (zlib.crc32(source) % 5 + 1)) if cdn_subdomain else ""
       prefix = "http://" + subdomain + (cloud_name + "-" if private_cdn else "") + "res.cloudinary.com"
     if not private_cdn:
       prefix += "/" + cloud_name
