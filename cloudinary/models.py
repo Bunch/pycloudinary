@@ -18,14 +18,17 @@ else:
 class CloudinaryFieldFile(ImageFieldFile):
 
   def save(self, name, content, save=True):
+    # Allow strings (URLs) to be saved as files
     if isinstance(content, str):
         content = StringWithSize(content)
+
     super(CloudinaryFieldFile, self).save(name, content, save)
 
   def url_with_options(self, **options):
     return utils.cloudinary_url(self.name, **options)[0]
 
 
+# This is necessary so we can easily save URLs in the DB
 class StringWithSize(str):
   size = 0
 
