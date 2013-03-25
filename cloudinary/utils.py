@@ -71,7 +71,18 @@ def api_sign_request(params_to_sign, api_secret):
 def cloudinary_url(source, **options):
   original_source = source
 
-  type = options.pop("type", "upload")
+  type = options.pop("type", None)
+
+  if not type:
+    try:
+      _, type, new_source = source.split('/', 2)
+      if type not in ('facebook', 'gravatar', 'twitter', 'twitter_name'):
+        type = "upload"
+      else:
+        source = new_source
+    except:
+      type = "upload"
+
   if type == 'fetch':
     options["fetch_format"] = options.get("fetch_format", options.pop("format", None))
   transformation, options = generate_transformation_string(**options)
@@ -117,9 +128,9 @@ def cloudinary_url(source, **options):
     if relative:
       prefix = ""
   
-  components = [transformation, "v" + str(version) if version else "", source]
+  components = [type, transformation, "v" + str(version) if version else "", source]
   if not relative:
-    components = [prefix, resource_type, type] + components
+    components = [prefix, resource_type] + components
   source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
   return (source, options)
   
