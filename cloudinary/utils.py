@@ -128,9 +128,14 @@ def cloudinary_url(source, **options):
     if relative:
       prefix = ""
   
-  components = [type, transformation, "v" + str(version) if version else "", source]
+  components = [transformation, "v" + str(version) if version else "", source]
+  if type != 'upload':
+      components = [type] + components
   if not relative:
-    components = [prefix, resource_type] + components
+    if type != 'upload':
+        components = [prefix, resource_type] + components
+    else:
+        components = [prefix, resource_type, type] + components
   source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
   return (source, options)
   
