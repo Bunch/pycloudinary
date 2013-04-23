@@ -16,6 +16,8 @@ else:
 
 
 class CloudinaryFieldFile(ImageFieldFile):
+    
+  closed = True
 
   def save(self, name, content, save=True):
     # Allow strings (URLs) to be saved as files
@@ -26,6 +28,40 @@ class CloudinaryFieldFile(ImageFieldFile):
 
   def url_with_options(self, **options):
     return utils.cloudinary_url(self.name, **options)[0]
+    
+  def _get_image_dimensions(self):
+      if not hasattr(self, '_dimensions_cache'):
+          self._dimensions_cache = get_image_dimensions(self)
+      return self._dimensions_cache
+      
+      
+def get_image_dimensions(file_or_path):
+    """
+    Returns the (width, height) of an image, given an open file or a path.  Set
+    'close' to True to close the file at the end if it is initially in an open
+    state.
+    """
+    # Try to import PIL in either of the two ways it can end up installed.
+    import ImageFile as PILImageFile
+
+    p = PILImageFile.Parser()
+    file = file_or_path
+    try:
+        # Most of the time PIL only needs a small chunk to parse the image and
+        # get the dimensions, but with some TIFF files PIL needs to parse the
+        # whole file.
+        chunk_size = 1024
+        while 1:
+            data = file.read(chunk_size)
+            if not data:
+                break
+            p.feed(data)
+            if p.image:
+                return p.image.size
+            chunk_size = chunk_size*2
+        return None
+    finally:
+        file.close()
 
 
 # This is necessary so we can easily save URLs in the DB
