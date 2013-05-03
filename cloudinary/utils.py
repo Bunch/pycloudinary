@@ -106,7 +106,7 @@ def cloudinary_url(source, **options):
     source = smart_escape(source)
   else:
     if re.match(r'^https?:', source): return (original_source, options)
-    if format: source = source + "." + format
+    if format: source = source.rsplit(".", 1)[0] + "." + format
   
   if cloud_name.startswith("/"):
     prefix = "/res" + cloud_name
