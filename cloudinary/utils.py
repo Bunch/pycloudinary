@@ -68,7 +68,10 @@ def api_sign_request(params_to_sign, api_secret):
   to_sign = "&".join(sorted([(k+"="+(",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]))
   return hashlib.sha1(to_sign + api_secret).hexdigest()
 
-def cloudinary_url(source, **options):
+def cloudinary_url(source, optionsarray=None, **options):
+  if optionsarray:
+    options = optionsarray[0]
+
   original_source = source
 
   type = options.pop("type", None)
@@ -86,6 +89,12 @@ def cloudinary_url(source, **options):
   if type == 'fetch':
     options["fetch_format"] = options.get("fetch_format", options.pop("format", None))
   transformation, options = generate_transformation_string(**options)
+
+  if optionsarray:
+      transformation = []
+      for _transformation in optionsarray:
+          transformation.append(generate_transformation_string(**_transformation)[0])
+      transformation = "/".join(transformation)
 
   resource_type = options.pop("resource_type", "image")
   version = options.pop("version", None)

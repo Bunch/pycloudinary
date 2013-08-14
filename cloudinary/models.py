@@ -29,6 +29,9 @@ class CloudinaryFieldFile(ImageFieldFile):
   def url_with_options(self, **options):
     return utils.cloudinary_url(self.name, **options)[0]
     
+  def url_with_options_chain(self, **options):
+    return utils.cloudinary_url(self.name, optionsarray=options['options'])[0]
+    
   def _get_image_dimensions(self):
       if not hasattr(self, '_dimensions_cache'):
           self._dimensions_cache = get_image_dimensions(self)
