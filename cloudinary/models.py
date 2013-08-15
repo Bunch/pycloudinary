@@ -1,3 +1,5 @@
+import re
+
 from cloudinary import forms, utils
 from cloudinary.storage import CloudinaryStorage
 from django.db import models
@@ -29,8 +31,26 @@ class CloudinaryFieldFile(ImageFieldFile):
   def url_with_options(self, **options):
     return utils.cloudinary_url(self.name, **options)[0]
     
-  def url_with_options_chain(self, **options):
-    return utils.cloudinary_url(self.name, optionsarray=options['options'])[0]
+  def url_with_options_chain(self, *options):
+    # Allow transformations to be chained together by passing in array of
+    # transformations
+    
+    # XXX Note that some fancy transformations will only work in the first
+    # XXX transformation, we'll build this functionality out further in the
+    # XXX future if we need it
+    
+    # Generate a base url based on the first transformation
+    url = utils.cloudinary_url(self.name, **options[0][0])[0]
+    
+    # For the rest of transformations in the chain, insert into the image
+    # url appropriately
+    for transformation in options[0][1:]:
+      split_pos = re.search('upload/.+?/',url).end()
+      url = url[:split_pos] + \
+        utils.generate_transformation_string(**transformation)[0] + '/' + \
+        url[split_pos:]
+    
+    return url
     
   def _get_image_dimensions(self):
       if not hasattr(self, '_dimensions_cache'):
